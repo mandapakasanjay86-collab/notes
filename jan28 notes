@@ -1,176 +1,55 @@
-================================================================================
-                    BIG DATA & SQL COMPREHENSIVE STUDY GUIDE
-================================================================================
+1. What is Big Data?
 
-Last Updated: 2026
-Purpose: Quick reference for Big Data concepts, Hadoop, Spark, SQL, and Data Engineering
+Deals with very large volumes of data (often > 1 TB, up to petabytes).
+Requires high computation power.
+Processed using parallel/distributed computation across clusters of machines.
+Characterized by the 3Vs (Volume, Velocity, Variety) — sometimes extended to 5Vs (adding Veracity & Value).
 
-
-================================================================================
-TABLE OF CONTENTS
-================================================================================
-
-1. Big Data Fundamentals
 2. Hadoop Ecosystem & Architecture
+Core Components
+
+HDFS (Hadoop Distributed File System) → Storage layer
+MapReduce → Batch processing engine
+YARN (Yet Another Resource Negotiator) → Resource management & job scheduling
+
+HDFS (Storage)
+
+Files split into blocks (default size: 128 MB or 256 MB in newer versions).
+Blocks distributed across DataNodes → enables parallel read/write.
+NameNode (Master): Stores metadata (file names, block locations).
+DataNode (Workers): Store actual data blocks; handle read/write.
+Replication for fault tolerance → Default replication factor = 3.
+Trade-off: Replication & recovery take time for very large datasets.
+
+
+MapReduce (Processing)
+
+Map Phase: Processes input data in parallel (e.g., word count per record).
+Reduce Phase: Aggregates/summarizes map outputs → final result.
+Limitation: Every step reads from & writes to disk → slow due to heavy I/O.
+
 3. Apache Spark Architecture
-4. Hadoop vs Spark Comparison
-5. Hadoop Ecosystem Tools
-6. MySQL/SQL Built-in Functions
-7. Data Concepts & Architecture
-8. SQL Core Language & Operations
+Why Spark over Hadoop MapReduce?
 
+In-memory processing → avoids repeated disk I/O.
+Ideal for iterative algorithms, real-time/streaming, and interactive analytics.
+Up to 10–100x faster than MapReduce (especially for iterative/ML workloads).
 
-================================================================================
-1. BIG DATA FUNDAMENTALS
-================================================================================
+Key Concepts
 
-Definition:
-  • Deals with very large volumes of data (often > 1 TB, up to petabytes)
-  • Requires high computation power
-  • Processed using parallel/distributed computation across clusters of machines
+RDD (Resilient Distributed Dataset): Immutable, distributed, fault-tolerant collection; primarily in-memory.
+In-memory caching of intermediate results → only final output written to disk.
 
-The 3Vs (Core Characteristics):
-  1. Volume: Massive amounts of data
-  2. Velocity: Speed of data generation & processing
-  3. Variety: Different data types & formats
+Spark Components
 
-Extended to 5Vs:
-  4. Veracity: Data quality & accuracy
-  5. Value: Actionable insights from data
+Driver Program: Main control process; creates SparkContext; coordinates tasks.
+Executors: Run on worker nodes; execute tasks; hold data partitions in memory/disk; return results.
+Cluster Manager: Allocates resources (YARN, Kubernetes, Standalone, Mesos).
 
+Nodes
 
-================================================================================
-2. HADOOP ECOSYSTEM & ARCHITECTURE
-================================================================================
-
---- Core Components Overview ---
-
-HDFS (Hadoop Distributed File System)
-  Role: Storage layer
-  Purpose: Distributed file system for fault-tolerant data storage
-
-MapReduce
-  Role: Batch processing engine
-  Purpose: Parallel computation on distributed data
-
-YARN (Yet Another Resource Negotiator)
-  Role: Resource management & job scheduling
-  Purpose: Allocates cluster resources to jobs
-
-
---- HDFS (Storage Layer) ---
-
-Block Structure:
-  • Files split into blocks (default size: 128 MB or 256 MB in newer versions)
-  • Blocks distributed across DataNodes
-  • Enables parallel read/write operations
-
-NameNode (Master):
-  • Stores metadata (file names, block locations)
-  • Does NOT store actual data
-  • Single point (in basic setup)
-
-DataNode (Workers):
-  • Store actual data blocks
-  • Handle read/write operations
-  • Report to NameNode
-
-Replication & Fault Tolerance:
-  • Default replication factor: 3
-  • Each block replicated across 3 DataNodes (usually on different racks)
-  • Trade-off: Replication & recovery take time for very large datasets
-
-Key Advantage: Fault tolerance through redundancy
-Key Limitation: Storage overhead from replication
-
-
---- MapReduce (Processing Engine) ---
-
-Map Phase:
-  • Processes input data in parallel
-  • Example: Word count per record
-  • Input split & distributed to mappers
-
-Reduce Phase:
-  • Aggregates/summarizes map outputs
-  • Produces final result
-  • Combines outputs from multiple mappers
-
-Data Flow:
-  Input → Map Phase → Shuffle & Sort → Reduce Phase → Output
-
-Key Limitation:
-  • Every step reads from & writes to disk
-  • Causes heavy I/O overhead
-  • Results in slower processing compared to in-memory systems
-
-
-================================================================================
-3. APACHE SPARK ARCHITECTURE
-================================================================================
-
---- Why Spark over Hadoop MapReduce? ---
-
-In-Memory Processing:
-  • Avoids repeated disk I/O
-  • Keeps intermediate results in RAM
-  • Only final output written to disk
-
-Use Case Advantages:
-  • Ideal for iterative algorithms
-  • Better for real-time/streaming data
-  • Superior for interactive analytics
-  • Excellent for ML workloads
-
-Performance Improvement:
-  • Up to 10–100x faster than MapReduce (especially for iterative/ML tasks)
-  • Speed depends on data size & available memory
-
-
---- Key Concepts ---
-
-RDD (Resilient Distributed Dataset):
-  • Immutable, distributed, fault-tolerant collection
-  • Primarily in-memory storage
-  • Built from transformations of existing RDDs
-  • Enables lineage tracking for fault recovery
-
-In-Memory Caching:
-  • Intermediate results cached in memory
-  • Only final output written to disk
-  • Dramatically improves iterative algorithm performance
-
-
---- Spark Components ---
-
-Driver Program:
-  • Main control process
-  • Creates SparkContext
-  • Coordinates task execution
-  • Runs on master node
-
-Executors:
-  • Run on worker nodes
-  • Execute actual tasks
-  • Hold data partitions in memory or disk
-  • Return results to driver
-
-Cluster Manager:
-  • Allocates cluster resources
-  • Scheduling & resource negotiation
-  • Options: YARN, Kubernetes, Standalone, Mesos
-
-Master Node:
-  • Manages cluster operations
-  • Handles job scheduling
-  • Maintains metadata
-
-Worker/Data Nodes:
-  • Store data
-  • Execute tasks
-  • Read/write operations
-  • Run Executors
-
+Master → Manages cluster, scheduling, metadata.
+Workers/Data Nodes → Store data, execute tasks, read/write.
 
 ================================================================================
 4. HADOOP vs SPARK COMPARISON (2025/2026 Perspective)
@@ -225,673 +104,153 @@ General Trend:
   while Hadoop remains relevant for specific large-scale batch scenarios.
 
 
-================================================================================
-5. HADOOP ECOSYSTEM TOOLS
-================================================================================
-
---- Hive ---
-
-Purpose: SQL-like interface over HDFS data
-
-Key Features:
-  • HiveQL: SQL-like query language
-  • Converts queries → MapReduce or Spark jobs automatically
-  • Built on top of Hadoop
-
-Best Use Cases:
-  • Batch processing of structured data
-  • Logs, CSV files, Parquet files
-  • Data warehouse operations
-  • Ad-hoc queries over large datasets
-
-Typical Workflow:
-  HiveQL Query → Hive Compiler → MapReduce/Spark Job → HDFS Data
-
-
---- HBase ---
-
-Purpose: NoSQL database built on HDFS
-
-Architecture:
-  • Column-oriented storage
-  • Optimized for real-time random read/write
-  • Not suitable for batch processing of all data
-
-Key Features:
-  • Real-time access
-  • Supports compression
-  • Scalable to billions of rows
-
-Use Cases:
-  • User profiles & accounts
-  • Counters & analytics
-  • Time-series data
-  • Clickstream data
-  • Real-time user activity tracking
-
-Comparison with HDFS:
-  • HDFS: Batch processing, sequential access, write-once
-  • HBase: Real-time access, random read/write, NoSQL
-
-
-================================================================================
-6. MySQL/SQL BUILT-IN FUNCTIONS
-================================================================================
-
---- String Functions ---
-
-Padding Functions:
-  LPAD(str, len, padstr)
-    → Left-pads string to specified length
-    → Example: LPAD(title, 20, '*') fills left if < 20 chars
-    
-  RPAD(str, len, padstr)
-    → Right-pads string to specified length
-    → Example: RPAD('hello', 10, '-') → 'hello-----'
-
-
-Substring & Extraction Functions:
-  SUBSTRING(str, start, length)
-  SUBSTRING(str FROM start FOR len)
-    → Extracts portion of string
-    → Note: Index starts at 1 (unlike Python which starts at 0)
-    → Example: SUBSTRING('hello', 2, 3) → 'ell'
-    
-  LEFT(str, n)
-    → Returns leftmost n characters
-    → Example: LEFT('hello', 3) → 'hel'
-    
-  RIGHT(str, n)
-    → Returns rightmost n characters
-    → Example: RIGHT('hello', 2) → 'lo'
-    
-  LOCATE(substr, str)
-    → Returns position of first occurrence (1-based)
-    → Example: LOCATE('ll', 'hello') → 3
-    → Returns 0 if not found
-
-
-Concatenation & Manipulation Functions:
-  CONCAT(str1, str2, ...)
-    → Concatenates strings (NULL-safe in MySQL)
-    
-  CONCAT_WS(sep, str1, str2, ...)
-    → Concatenates with separator
-    → Example: CONCAT_WS('-', 'John', 'Doe') → 'John-Doe'
-    
-  REVERSE(str)
-    → Reverses string order
-    → Example: REVERSE('hello') → 'olleh'
-    
-  LENGTH(str) / CHAR_LENGTH(str)
-    → Returns string length
-    → LENGTH: counts bytes
-    → CHAR_LENGTH: counts characters (for multi-byte chars)
-    
-  UPPER(str) / LOWER(str)
-    → Converts case
-    → Example: UPPER('hello') → 'HELLO'
-    
-  REPLACE(str, from_str, new_str)
-    → Replaces all occurrences
-    → Example: REPLACE('hello', 'l', 'x') → 'hexxo'
-    
-  TRIM([BOTH | LEADING | TRAILING] char FROM str)
-    → Removes characters from string edges
-    → Also: LTRIM(str), RTRIM(str) for left/right trim
-    → Example: TRIM('  hello  ') → 'hello'
-
-
-Regular Expression Functions:
-  REGEXP / RLIKE
-    → Pattern matching (more powerful than LIKE)
-    
-  Examples:
-    title REGEXP '[eE]$'
-      → Matches titles ending with 'e' or 'E'
-    
-    [^aeiouAEIOU]{3}
-      → Matches three consecutive non-vowels
-    
-  Regex Anchors:
-    ^ = Start of string
-    $ = End of string
-    
-  Note: Unlike LIKE (which uses % and _), REGEXP uses standard regex syntax
-
-
---- Math & Aggregation Functions ---
-
-Aggregation:
-  SUM(column)         → Sum of values
-  COUNT(column)       → Count of rows
-  COUNT(*)            → Count all rows (including NULLs in count)
-  COUNT(DISTINCT)     → Count unique values
-  AVG(column)         → Average value
-  MIN(column)         → Minimum value
-  MAX(column)         → Maximum value
-
-Math Functions:
-  FLOOR(n)            → Rounds down to nearest integer
-  CEIL(n)             → Rounds up to nearest integer
-  ROUND(n, decimals)  → Rounds to specified decimal places
-  RAND()              → Random number between 0 and 1
-  POWER(n, p)         → Raises n to power p
-  MOD(n, m)           → Remainder of n/m (also: n % m)
-
-
---- Date & Time Functions ---
-
-Current Date/Time:
-  NOW()               → Current date and time
-  CURDATE() / CURRENT_DATE → Current date only (no time)
-  CURRENT_TIME        → Current time only (no date)
-
-Date Arithmetic:
-  NOW() - INTERVAL 1 DAY       → Date from 1 day ago
-  DATE_ADD(date, INTERVAL 1 MONTH) → Add 1 month
-  DATE_SUB(date, INTERVAL 1 HOUR)  → Subtract 1 hour
-
-Formatting & Manipulation:
-  DATE_FORMAT(date, format)
-    → Formats date according to pattern
-    → Example: DATE_FORMAT(NOW(), '%Y-%m-%d') → '2026-01-28'
-    
-  DATE_ADD(date, INTERVAL value unit)
-    → Adds interval to date
-    → Units: YEAR, MONTH, DAY, HOUR, MINUTE, SECOND
-    
-  DATE_SUB(date, INTERVAL value unit)
-    → Subtracts interval from date
-
-
---- Type Casting ---
-
-CAST(expr AS type)
-  → Converts expression to specified type
-  → Example: CAST('123' AS INT) → 123
-  
-CONVERT(expr, type)
-  → Alternative syntax for type conversion
-  → Example: CONVERT('123', UNSIGNED)
-
-Common Type Conversions:
-  • DECIMAL → INT
-  • INT → VARCHAR
-  • VARCHAR → INT
-  • DATE → VARCHAR
-  • VARCHAR → DATE
-
-
-================================================================================
-7. DATA CONCEPTS & ARCHITECTURE
-================================================================================
-
---- Data → Information → Insights ---
-
-Raw Data:
-  • Logs from applications
-  • Click events
-  • Transaction records
-  • Sensor readings
-  • Characteristics: No meaning alone, unstructured/semi-structured
-
-Information:
-  • Cleaned raw data
-  • Aggregated & processed
-  • Organized in structured formats
-  • Validated against business rules
-
-Insights:
-  • Actionable patterns & trends
-  • Business-critical discoveries
-  • Decision-making intelligence
-  • Competitive advantages
-
-
---- Data Roles & Responsibilities ---
-
-Data Engineer:
-  Focus: Building & maintaining data pipelines
-  Responsibilities:
-    • ETL/ELT pipeline design & implementation
-    • Data reliability & quality
-    • Scalability & performance optimization
-    • Infrastructure management
-  Tools: Apache Spark, Airflow, Kafka, dbt, Snowflake
-
-Data Analyst:
-  Focus: Discovering patterns & insights from data
-  Responsibilities:
-    • Ad-hoc queries & analysis
-    • Identifying trends
-    • Business intelligence (BI)
-    • Forecasting & reporting
-  Tools: SQL, Tableau, Power BI, Python/R
-
-Data Scientist:
-  Focus: Building predictive & analytical models
-  Responsibilities:
-    • Statistical analysis
-    • Machine learning model development
-    • Domain expertise application
-    • Solving business problems with ML
-  Skills: Statistics, ML, Python/R, SQL, Domain Knowledge
-
-ML/AI Engineer:
-  Focus: Production deployment & optimization of models
-  Responsibilities:
-    • Production model deployment
-    • Recommendation systems
-    • Fraud detection
-    • NLP applications
-    • Model monitoring & optimization
-  Tools: TensorFlow, PyTorch, Kubernetes, Python
-
-
---- ETL vs ELT ---
-
-ETL (Extract, Transform, Load) - Traditional Approach:
-  1. Extract: Pull data from source
-  2. Transform: Clean, validate, aggregate (on-premises or staging)
-  3. Load: Store in data warehouse
-  
-  Characteristics:
-    • Transform BEFORE loading
-    • Suitable for on-premises systems
-    • Data reduction before storage
-    • Lower initial cloud storage costs
-
-ELT (Extract, Load, Transform) - Modern Cloud Approach:
-  1. Extract: Pull data from source
-  2. Load: Store raw data in cloud (data lake)
-  3. Transform: Clean & process using cloud compute
-  
-  Characteristics:
-    • Load raw data first
-    • Transform AFTER loading
-    • Cost-efficient (cloud storage cheap, compute on-demand)
-    • More flexible (transform as needed)
-    • Maintains raw data lineage
-
-
---- Data Lake (Medallion Architecture) ---
-
-Three-Layer Structure:
-
-Bronze Layer (Raw Ingestion):
-  • Raw, unprocessed data
-  • Minimal transformation
-  • All source data stored as-is
-  • Purpose: Historical archive & audit trail
-
-Silver Layer (Cleaned & Validated):
-  • Applied data quality rules
-  • Removed duplicates
-  • Standardized formats
-  • Applied business rules
-  • Purpose: Trusted source for analytics
-
-Gold Layer (Aggregated & Reporting-Ready):
-  • Pre-aggregated metrics
-  • Dimensional tables
-  • Optimized for reporting & dashboards
-  • Purpose: Business intelligence & analytics
-
-Benefits:
-  • Clear data quality progression
-  • Flexibility to re-transform raw data
-  • Maintains audit trail
-  • Separation of concerns
-
-
---- Data Warehouse ---
-
-Structure & Components:
-
-Fact Table:
-  • Stores measurable events & metrics
-  • Examples: Sales, Revenue, Transactions
-  • Contains foreign keys to dimensions
-  • Typically large (millions/billions of rows)
-
-Dimension Table:
-  • Provides context & attributes
-  • Examples: Customer, Time, Product, Location
-  • Contains descriptive information
-  • Typically smaller (thousands to millions of rows)
-
-Dimensional Schemas:
-
-Star Schema:
-  • Single fact table connected to multiple dimension tables
-  • Structure: Fact table in center, dimensions around it
-  • Advantages: Simple queries, easy to understand
-  • Disadvantages: Data redundancy in dimensions
-  
-Snowflake Schema:
-  • Normalized dimensions (dimensions have sub-dimensions)
-  • Structure: Multiple levels of hierarchy
-  • Advantages: Reduced redundancy, storage efficient
-  • Disadvantages: More complex queries (more JOINs)
-
-
---- Change Data Capture (CDC) ---
-
-Purpose: Track data changes efficiently
-
-Mechanism:
-  • Identifies only the "delta" (changes) in data
-  • Tracks: INSERT, UPDATE, DELETE operations
-  • Records: What changed, when, and where
-
-Benefits:
-  • Efficient data ingestion (only changes processed)
-  • Reduced bandwidth & storage
-  • Real-time data synchronization
-  • Supports incremental updates
-
-Common Approaches:
-  • Query logs from source database
-  • Log-based CDC (database transaction logs)
-  • Query-based CDC (timestamp/version columns)
-  • Query result CDC (comparing snapshots)
-
-
---- Orchestration ---
-
-Purpose: Manage complex data workflows
-
-Responsibilities:
-  • Manages task dependencies
-  • Handles retries on failure
-  • Manages failure scenarios & error handling
-  • Scheduling & timing control
-  • Monitoring & alerting
-
-Key Difference from Scheduling:
-  Scheduling: Fixed time-based execution (e.g., daily at 2 AM)
-  Orchestration: Smart dependency-based flow (e.g., run Task B after Task A succeeds)
-
-Popular Orchestration Tools:
-  • Apache Airflow: DAG-based, Python-friendly, widely adopted
-  • Prefect: Modern, cloud-native, flexible task dependencies
-  • Dagster: Asset-oriented, strong testing, production-ready
-  • dbt: Transformation-focused, SQL-based
-  • Kubernetes CronJobs: Container-based, cloud-native
-
-Typical Workflow:
-  Data Extraction → Data Quality Checks → Transformation → Loading → Reporting
-  (All coordinated & monitored by orchestration tool)
-
-
-================================================================================
-8. SQL CORE LANGUAGE & OPERATIONS
-================================================================================
-
---- SQL Language Categories ---
-
-DDL (Data Definition Language):
-  CREATE  → Create new database objects (tables, views, indexes)
-  ALTER   → Modify existing objects
-  DROP    → Delete objects entirely
-  TRUNCATE → Delete all data (keep structure)
-
-DML (Data Manipulation Language):
-  INSERT  → Add new rows
-  UPDATE  → Modify existing rows
-  DELETE  → Remove rows
-
-DQL (Data Query Language):
-  SELECT  → Retrieve data
-
-DCL (Data Control Language):
-  GRANT   → Give permissions to users
-  REVOKE  → Remove permissions from users
-
-TCL (Transaction Control Language):
-  COMMIT     → Finalize changes (make permanent)
-  ROLLBACK   → Undo changes (revert to previous state)
-  SAVEPOINT  → Create recovery point within transaction
-
-
---- Table Constraints ---
-
-NOT NULL:
-  • Column must have a value
-  • Cannot leave empty
-  
-UNIQUE:
-  • Each row must have unique value in column
-  • Allows NULL (typically)
-  
-PRIMARY KEY:
-  • Uniquely identifies each row
-  • Combines NOT NULL + UNIQUE
-  • Only one per table
-  
-FOREIGN KEY:
-  • References primary key in another table
-  • Maintains referential integrity
-  
-CHECK:
-  • Validates column value against condition
-  • Example: CHECK (age >= 18)
-  
-DEFAULT:
-  • Provides default value if none specified
-  • Example: DEFAULT CURRENT_DATE
-
-ON DELETE / ON UPDATE Actions:
-  RESTRICT → Prevent deletion/update if referenced elsewhere
-  CASCADE  → Delete/update referenced rows too
-  SET NULL → Set to NULL when referenced row changes
-
-
---- DELETE vs TRUNCATE vs DROP ---
-
-DELETE:
-  Scope: Removes specified rows
-  WHERE: Supports WHERE clause (delete selectively)
-  Rollback: Can be rolled back (within transaction)
-  Speed: Slower (row-by-row deletion)
-  Triggers: Fires DELETE triggers
-  Identity: Can reset identity seed
-  Example: DELETE FROM users WHERE age < 18;
-
-TRUNCATE:
-  Scope: Removes ALL rows
-  WHERE: No WHERE clause (cannot be selective)
-  Rollback: Cannot be rolled back (depends on settings)
-  Speed: Much faster (structural delete)
-  Triggers: Does NOT fire triggers
-  Identity: Resets identity seed
-  Structure: Table structure remains
-  Example: TRUNCATE TABLE users;
-
-DROP:
-  Scope: Removes entire table
-  Structure: Completely removes table definition
-  Data: All data deleted
-  Space: Deallocates storage space
-  Rollback: Cannot be rolled back (in most systems)
-  Triggers: N/A (table no longer exists)
-  Example: DROP TABLE users;
-
-Use Cases:
-  • DELETE: Remove specific rows based on condition
-  • TRUNCATE: Clear all data quickly but keep structure
-  • DROP: Complete table removal (use carefully!)
-
-
---- MySQL Safe Mode ---
-
-Purpose: Prevent accidental mass updates/deletes
-
-Safe Mode Setting:
-  SET SQL_SAFE_UPDATES = 1;  → Enable (default in MySQL Workbench)
-  SET SQL_SAFE_UPDATES = 0;  → Disable
-
-Restrictions When ON:
-  • UPDATE without WHERE or condition on indexed column → BLOCKED
-  • DELETE without WHERE or condition on indexed column → BLOCKED
-
-Workaround:
-  SET SQL_SAFE_UPDATES = 0;
-  [execute dangerous query]
-  SET SQL_SAFE_UPDATES = 1;
-
-Important Note:
-  Works on indexed columns even when ON (if WHERE uses indexed column)
-
-
---- Filtering & Grouping Operations ---
-
-WHERE Clause:
-  • Filters rows BEFORE aggregation
-  • Applied to individual rows
-  • Example: WHERE age > 30 AND status = 'active'
-
-HAVING Clause:
-  • Filters groups AFTER aggregation
-  • Applied to aggregate results
-  • Example: HAVING COUNT(*) > 5
-  • Must use aggregate functions
-
-LIKE Operator:
-  • Pattern matching on text
-  • % = matches any number of characters
-  • _ = matches single character
-  • Example: LIKE 'John%' matches 'John', 'Johnny', etc.
-
-IN / NOT IN:
-  • Check if value in list
-  • Example: WHERE status IN ('active', 'pending')
-
-BETWEEN:
-  • Range checking (inclusive)
-  • Example: WHERE age BETWEEN 18 AND 65
-
-IS NULL / IS NOT NULL:
-  • Check for NULL values
-  • Example: WHERE email IS NOT NULL
-
-ORDER BY:
-  • Sorts result set
-  • ASC = ascending (default)
-  • DESC = descending
-  • Example: ORDER BY name ASC, age DESC
-
-LIMIT / OFFSET:
-  • Limit number of results
-  • LIMIT 10 = return first 10 rows
-  • OFFSET 20 = skip first 20 rows
-  • Example: LIMIT 10 OFFSET 20 (rows 21-30)
-
-
---- SQL Execution Order (Logical) ---
-
-Important: This is the LOGICAL order, not necessarily the physical execution order
-
-1. FROM
-   → Identifies source table(s)
-   → Cartesian product if multiple tables
-
-2. JOIN
-   → Combines rows from multiple tables
-   → Applied after FROM
-
-3. WHERE
-   → Filters individual rows
-   → Eliminates rows before aggregation
-
-4. GROUP BY
-   → Groups rows by column values
-   → Creates aggregate result set
-
-5. HAVING
-   → Filters groups (after aggregation)
-   → Cannot reference non-aggregated columns
-
-6. SELECT
-   → Specifies which columns to return
-   → Applies transformations & aliases
-
-7. ORDER BY
-   → Sorts final result set
-   → Can use aliases from SELECT
-
-8. LIMIT
-   → Restricts number of rows returned
-   → Applied last
-
-Example Query Execution:
-  SELECT department, COUNT(*) as emp_count
-  FROM employees
-  WHERE salary > 50000
-  GROUP BY department
-  HAVING COUNT(*) > 5
-  ORDER BY emp_count DESC
-  LIMIT 10;
-
-Execution Flow:
-  1. FROM employees → Load all employees
-  2. WHERE salary > 50000 → Filter high earners
-  3. GROUP BY department → Group by department
-  4. HAVING COUNT(*) > 5 → Keep departments with 5+ employees
-  5. SELECT → Select department & count columns
-  6. ORDER BY emp_count DESC → Sort by count descending
-  7. LIMIT 10 → Return top 10 departments
-
-
-================================================================================
-QUICK REFERENCE GUIDE
-================================================================================
-
-Hadoop:
-  ✓ Good for: Massive batch processing, cost-effective storage
-  ✗ Not for: Real-time, iterative processing, ML workloads
-
-Spark:
-  ✓ Good for: ML, real-time, iterative, interactive analytics
-  ✗ Not for: Massive batch at lowest cost
-
-Hive:
-  ✓ Use when: Need SQL interface on HDFS data
-
-HBase:
-  ✓ Use when: Need real-time random access to data
-
-SQL Queries:
-  - Always use WHERE for row filtering
-  - Use HAVING for group filtering
-  - Remember: FROM → WHERE → GROUP BY → HAVING → SELECT → ORDER BY → LIMIT
-  - DELETE is slower but safer; TRUNCATE is faster but irreversible
-
-Data Engineering:
-  - Medallion Architecture: Bronze (raw) → Silver (clean) → Gold (aggregated)
-  - ETL (transform before load) vs ELT (load then transform)
-  - Use CDC for efficient incremental updates
-  - Orchestrate with Airflow, Prefect, or Dagster
-
-Data Roles:
-  - Engineer: Builds pipelines & infrastructure
-  - Analyst: Finds insights & reports
-  - Scientist: Builds predictive models
-  - ML Engineer: Deploys & maintains models in production
-
-
-================================================================================
-END OF STUDY GUIDE
-================================================================================
-
-For additional learning:
-  • Practice with actual Spark/Hadoop clusters
-  • Write sample SQL queries
-  • Explore Airflow DAG configurations
-  • Study dbt for transformation best practices
-  • Experiment with Medallion Architecture implementations
-
-Good luck with your Big Data & SQL journey!
-
-================================================================================
+
+
+
+
+
+5. Ecosystem Tools on Hadoop
+
+Hive – SQL-like interface (HiveQL) on HDFS.
+Converts queries → MapReduce or Spark jobs.
+Best for batch processing of structured data (logs, CSV, Parquet).
+
+HBase – NoSQL database on HDFS.
+Column-oriented; real-time random read/write.
+Use cases: user profiles, counters, time-series, clickstream.
+
+
+6. MySQL / SQL Built-in Functions (String & Others)
+String Functions
+
+Padding
+LPAD(str, len, padstr) → left-pad
+LPAD(title, 20, '*') → fills left side if < 20 chars
+
+RPAD(str, len, padstr) → right-pad
+
+Substring / Extraction
+SUBSTRING(str, start, length) or SUBSTRING(str FROM start FOR len)
+Index starts at 1 (unlike Python → 0).
+
+LEFT(str, n) / RIGHT(str, n)
+LOCATE(substr, str) → position of first match (1-based)
+
+Concatenation & Manipulation
+CONCAT(str1, str2, ...) or CONCAT_WS(sep, ...) (with separator)
+REVERSE(str)
+LENGTH(str) / CHAR_LENGTH(str) (characters vs bytes)
+UPPER(str) / LOWER(str)
+REPLACE(str, from_str, new_str)
+TRIM([BOTH | LEADING | TRAILING] char FROM str) (also LTRIM, RTRIM)
+
+Regular Expressions
+REGEXP / RLIKE
+title REGEXP '[eE]$' → ends with e or E
+[^aeiouAEIOU]{3} → three consecutive non-vowels
+^ = start, $ = end (no % wildcard like LIKE)
+
+
+
+Math & Aggregation
+
+SUM(), COUNT(), AVG(), MIN(), MAX()
+FLOOR(), CEIL(), ROUND(), RAND(), POWER(), MOD()
+
+Date / Time
+
+NOW() → date + time
+CURDATE() / CURRENT_DATE → date only
+CURRENT_TIME → time only
+Date arithmetic: NOW() - INTERVAL 1 DAY
+DATE_FORMAT(), DATE_ADD(), DATE_SUB()
+
+Type Casting
+
+CAST(expr AS type) or CONVERT(expr, type)
+Common: DECIMAL → INT, INT → VARCHAR, etc.
+
+7. Data Concepts – Big Picture
+Data → Information → Insights
+
+Raw Data: Logs, clicks, transactions (no meaning alone)
+Information: Cleaned, aggregated, processed
+Insights: Actionable patterns, trends, decisions
+
+Data Engineer vs Analyst vs Scientist vs ML Engineer
+
+Data Engineer: Pipelines, ETL/ELT, reliability, scale
+Data Analyst: Patterns, trends, BI, forecasting
+Data Scientist: Stats + ML + domain → business solutions
+ML/AI Engineer: Production models, recommendation, fraud, NLP
+
+ETL vs ELT
+
+ETL: Transform before load (traditional, on-prem)
+ELT: Load raw → transform in cloud (cost-efficient, flexible)
+
+Data Lake (Medallion Architecture)
+
+Bronze → Raw ingestion
+Silver → Cleaned, validated, business rules
+Gold → Aggregated, reporting-ready
+
+Data Warehouse
+
+Fact Table: Measures (sales, revenue)
+Dimension Table: Context (customer, time, product)
+Schemas: Star / Snowflake
+
+Change Data Capture (CDC)
+
+Tracks only deltas → efficient ingestion
+
+Orchestration
+
+Manages dependencies, retries, failures (Airflow, Prefect, Dagster, etc.)
+Scheduling = fixed time; Orchestration = smart dependency flow
+
+8. SQL – Core Language Categories & Operations
+Categories
+
+DDL: CREATE, ALTER, DROP, TRUNCATE
+DML: INSERT, UPDATE, DELETE
+DQL: SELECT
+DCL: GRANT, REVOKE
+TCL: COMMIT, ROLLBACK, SAVEPOINT
+
+Constraints
+
+NOT NULL, UNIQUE, PRIMARY KEY, FOREIGN KEY, CHECK, DEFAULT
+ON DELETE/UPDATE: RESTRICT, CASCADE, SET NULL
+
+DELETE vs TRUNCATE vs DROP
+
+DELETE → row-level, rollback possible, WHERE allowed
+TRUNCATE → all rows, faster, no rollback, structure remains
+DROP → entire table gone
+
+Safe Mode (MySQL)
+
+SET SQL_SAFE_UPDATES = 0; → allows mass UPDATE/DELETE
+Works on indexed columns even when ON
+
+Filtering & Grouping
+
+WHERE → row-level (before GROUP BY)
+HAVING → group-level (after aggregation)
+LIKE → % (any chars), _ (single char)
+IN / NOT IN, BETWEEN, IS NULL
+ORDER BY … ASC/DESC
+LIMIT / OFFSET
+
+Execution Order (Logical)
+
+FROM → JOIN
+WHERE
+GROUP BY
+HAVING
+SELECT
+ORDER BY
+LIMIT
+
